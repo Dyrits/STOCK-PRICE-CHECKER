@@ -15,10 +15,10 @@ module.exports = function (app) {
           like && likes[symbol].add(anonymize(ip));
           return { symbol, count: likes[symbol].size };
         });
-        const average = Math.round(stocks.reduce((sum, { count }) => sum + count, 0) / stocks.length);
+        const difference = stocks[0].count - stocks[1].count;
         for (const { symbol, count } of stocks) {
           const { latestPrice } = await api.get(symbol);
-          stockData.push({ stock: symbol, price: latestPrice, rel_likes: count - average + Number(count >= average) });
+          stockData.push({ stock: symbol, price: latestPrice, rel_likes: symbol === stocks[0].symbol ? difference : -difference });
         }
         response.json(stockData);
       } else {
