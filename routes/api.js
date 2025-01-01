@@ -1,17 +1,35 @@
 'use strict';
 const crypto = require('crypto');
+const { readFileSync, writeFileSync } = require("fs");
+const { join } = require("path");
 
-const likes = {}
+const file = join(__dirname, "../data", process.env.NODE_ENV === "test" ? "test-likes.json" : "likes.json");
+
+function read() {
+  return JSON.parse(readFileSync(file, 'utf8'));
+}
+
+function write(likes) {
+  const $likes = {};
+  for (const [key, value] of Object.entries(likes)) {
+    $likes[key] = Array.from(value);
+  }
+  writeFileSync(file, JSON.stringify($likes, null, 2));
+}
+
 
 module.exports = function (app) {
 
   app.route('/api/stock-prices')
     .get(async function ({ query, ip }, response){
-      const { stock, like } = query;
+      console.log(query, ip);
+      let { stock, like } = query;
+      like = like === "true";
+      const likes = read();
       if (Array.isArray(stock)) {
         const stockData = [];
         const stocks = stock.map(symbol => {
-          likes[symbol] = likes[symbol] || new Set();
+          likes[symbol] = Array.isArray(likes[symbol]) ? new Set(likes[symbol]) : new Set();
           like && likes[symbol].add(anonymize(ip));
           return { symbol, count: likes[symbol].size };
         });
@@ -20,11 +38,13 @@ module.exports = function (app) {
           const { latestPrice } = await api.get(symbol);
           stockData.push({ stock: symbol, price: latestPrice, rel_likes: symbol === stocks[0].symbol ? difference : -difference });
         }
-        response.json(stockData);
+        write(likes);
+        response.json({ stockData });
       } else {
-        likes[stock] = likes[stock] || new Set();
+        likes[stock] = Array.isArray(likes[stock]) ? new Set(likes[stock]) : new Set();
         like && likes[stock].add(anonymize(ip));
         const { latestPrice } = await api.get(stock);
+        write(likes);
         response.json({ stockData: { stock, price: latestPrice, likes: likes[stock].size } });
       }
     })
@@ -40,3 +60,4 @@ const api = {
 function anonymize(ip) {
   return crypto.createHash('sha256').update(ip).digest('hex');
 }
+
