@@ -16,12 +16,12 @@ The original README notes this repository was created from the freeCodeCamp boil
 
 ### Prerequisites
 
-- Node.js and npm
+- Node.js 26 LTS (`nvm use`) and npm
 
 ### Installation
 
 ```sh
-npm install
+npm ci
 ```
 
 Copy `sample.env` to `.env` and fill in the values.
@@ -33,6 +33,14 @@ npm start
 ```
 
 The server listens on the port set in `.env`, or 3000 by default. With `NODE_ENV=test`, the functional tests run at startup.
+
+### Tests
+
+`npm test` runs the five existing functional tests with a test-only stock-price fixture. It covers single/two-stock responses, likes deduplication and relative likes without calling the public price proxy. The fixture restores the test likes file on exit. Importing the app in tests no longer starts a persistent listener; `npm start` still does.
+
+The startup test runner and CLI use the same BDD interface. `NODE_ENV=test npm start` still runs the embedded freeCodeCamp tests, using the real proxy unless the test fixture is preloaded. Mocha's glob/minimatch dependencies are pinned to patched major versions through scoped overrides, verified with CLI and embedded test discovery.
+
+Neither test mode proves live proxy availability or production durability of the JSON likes store.
 
 ## License
 

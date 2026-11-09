@@ -55,7 +55,7 @@ emitter.run = function() {
   var separator = ' -> ';
   // Run the tests.
   try {
-  var runner = mocha.ui('tdd').run()
+  var runner = mocha.ui('bdd').run()
     .on('test end', function(test) {
         // remove comments
         var body = test.body.replace(/\/\/.*\n|\/\*.*\*\//g, '');

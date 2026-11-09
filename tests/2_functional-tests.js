@@ -13,7 +13,7 @@ Viewing two stocks: GET request to /api/stock-prices/
 Viewing two stocks and liking them: GET request to /api/stock-prices/
  */
 
-suite('Functional Tests', function() {
+describe('Functional Tests', function() {
   // The tests will update the likes object in the routes/api.js file but using the same IP address for all requests.
 
   after(function (done) {
